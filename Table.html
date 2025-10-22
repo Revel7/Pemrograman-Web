@@ -1,0 +1,27 @@
+<!-- table.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>16x16 Table 4x4 Color Blocks</title>
+</head>
+<body>
+<script>
+    const colors = ['#3498db', '#2ecc71', '#f39c12', '#e74c3c']; // blue, green, orange, red
+    document.write('<table border="1" cellspacing="0" cellpadding="4"><tbody>');
+    for(let i=0; i<16; i++){
+        document.write('<tr>');
+        for(let j=0; j<16; j++){
+            // Each 4x4 block gets a unique color
+            let blockRow = Math.floor(i/4);
+            let blockCol = Math.floor(j/4);
+            let colorIndex = blockRow * 4 + blockCol;
+            colorIndex = (blockRow * 4 + blockCol) % colors.length;
+            document.write('<td style="background-color:' + colors[colorIndex] + '"></td>');
+        }
+        document.write('</tr>');
+    }
+    document.write('</tbody></table>');
+</script>
+</body>
+</html>
