@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kalkulator Pengukur Suhu - Tema Gelap</title>
+  <style>
+    :root{
+      --bg: #1e1e2f;
+      --card: rgba(40,40,55,0.8);
+      --glass: rgba(40,40,55,0.35);
+      --accent: #4b7cff;
+      --muted: #a0a0b0;
+      --radius: 14px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color-scheme: dark;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;background:linear-gradient(180deg,var(--bg),#111122 60%);display:flex;align-items:center;justify-content:center;padding:32px;color:#e0e0e0;
+    }
+    .wrap{width:100%;max-width:840px}
+
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:28px;backdrop-filter: blur(10px) saturate(120%);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .title{display:flex;gap:14px;align-items:center}
+    .logo{width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#8fc7ff);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;box-shadow:0 6px 18px rgba(75,124,255,0.5)}
+    h1{font-size:20px;margin:0}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:18px}
+    @media (max-width:880px){.grid{grid-template-columns:1fr}}
+
+    .panel{background:var(--glass);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.1)}
+
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
+    .input-row{display:flex;gap:10px;align-items:center}
+    input[type="number"], select{flex:1;padding:12px;border-radius:10px;border:none;background:rgba(255,255,255,0.1);color:#e0e0e0;outline:2px solid transparent;font-size:16px}
+    input[type="number"]:focus, select:focus{outline:2px solid rgba(75,124,255,0.25)}
+
+    button{background:linear-gradient(90deg,var(--accent),#7aa6ff);border:none;color:white;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;box-shadow:0 8px 20px rgba(75,124,255,0.5)}
+    .btn-ghost{background:transparent;color:var(--accent);box-shadow:none;border:1px solid rgba(75,124,255,0.25)}
+
+    .result{font-size:24px;font-weight:700;margin:8px 0}
+    .muted-small{font-size:12px;color:var(--muted)}
+
+    .history{max-height:220px;overflow:auto;padding-right:6px}
+    .history-item{padding:8px;border-radius:8px;background:rgba(255,255,255,0.05);margin-bottom:8px;border:1px solid rgba(255,255,255,0.05)}
+
+    footer{margin-top:14px;text-align:right;color:var(--muted);font-size:12px}
+
+    .controls{display:flex;gap:8px;align-items:center}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="main">
+      <header>
+        <div class="title">
+          <div class="logo">°C</div>
+          <div>
+            <h1>Kalkulator Pengukur Suhu</h1>
+            <p class="lead">Konversi cepat antar Celsius, Fahrenheit, Kelvin, dan Reaumur.</p>
+          </div>
+        </div>
+        <div class="muted-small">Pengukur Suhu</div>
+      </header>
+
+      <div class="grid">
+        <section>
+          <div class="panel">
+            <label for="value">Masukkan nilai suhu</label>
+            <div class="input-row">
+              <input id="value" type="number" step="any" placeholder="Contoh: 37" aria-label="nilai suhu" />
+              <select id="from" aria-label="dari satuan">
+                <option value="C">Celsius (°C)</option>
+                <option value="F">Fahrenheit (°F)</option>
+                <option value="K">Kelvin (K)</option>
+                <option value="R">Reaumur (°Re)</option>
+              </select>
+            </div>
+
+            <div style="height:12px"></div>
+
+            <label for="to">Konversi ke</label>
+            <div class="input-row">
+              <select id="to" aria-label="ke satuan">
+                <option value="F">Fahrenheit (°F)</option>
+                <option value="C">Celsius (°C)</option>
+                <option value="K">Kelvin (K)</option>
+                <option value="R">Reaumur (°Re)</option>
+              </select>
+              <div style="flex:0">
+                <button id="convert">Konversi</button>
+              </div>
+            </div>
+
+            <div style="height:18px"></div>
+
+            <div aria-live="polite">
+              <div class="muted-small">Hasil</div>
+              <div class="result" id="result">—</div>
+              <div class="muted-small" id="explain"></div>
+            </div>
+
+            <div style="height:12px"></div>
+            <div class="controls">
+              <button id="swap" class="btn-ghost" title="Tukar satuan">⇄ Tukar</button>
+              <button id="copy" class="btn-ghost" title="Salin hasil">📋 Salin</button>
+              <button id="clear" class="btn-ghost" title="Bersihkan riwayat">🧹 Bersihkan</button>
+            </div>
+          </div>
+        </section>
+
+        <aside>
+          <div class="panel">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <div>
+                <strong>Riwayat Konversi</strong>
+                <div class="muted-small">(maks 20 item)</div>
+              </div>
+              <div class="muted-small" id="count">0</div>
+            </div>
+
+            <div class="history" id="history" aria-live="polite"></div>
+            <footer>Created · Revyano</footer>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toCelsius(value, from){
+      value = Number(value);
+      switch(from){
+        case 'C': return value;
+        case 'F': return (value - 32) * 5/9;
+        case 'K': return value - 273.15;
+        case 'R': return value * 5/4;
+        default: return NaN;
+      }
+    }
+    function fromCelsius(c, to){
+      switch(to){
+        case 'C': return c;
+        case 'F': return c * 9/5 + 32;
+        case 'K': return c + 273.15;
+        case 'R': return c * 4/5;
+        default: return NaN;
+      }
+    }
+
+    function pretty(num){
+      if (!isFinite(num)) return 'Tidak valid';
+      let str = Number(num.toPrecision(6)).toString();
+      return str;
+    }
+
+    const el = id => document.getElementById(id);
+    const valueEl = el('value');
+    const fromEl = el('from');
+    const toEl = el('to');
+    const resultEl = el('result');
+    const explainEl = el('explain');
+    const historyEl = el('history');
+    const countEl = el('count');
+
+    let history = [];
+
+    function renderHistory(){
+      historyEl.innerHTML = '';
+      history.slice().reverse().forEach(item => {
+        const d = document.createElement('div');
+        d.className = 'history-item';
+        d.textContent = `${item.input} ${item.from} → ${item.output} ${item.to}`;
+        historyEl.appendChild(d);
+      });
+      countEl.textContent = history.length;
+    }
+
+    function convert(){
+      const raw = valueEl.value.trim();
+      if (raw === ''){
+        resultEl.textContent = 'Masukkan nilai suhu.';
+        explainEl.textContent = '';
+        return;
+      }
+      const from = fromEl.value;
+      const to = toEl.value;
+      const v = Number(raw);
+      if (Number.isNaN(v)){
+        resultEl.textContent = 'Nilai tidak valid.';
+        explainEl.textContent = '';
+        return;
+      }
+      const c = toCelsius(v, from);
+      const out = fromCelsius(c, to);
+      const prettyOut = pretty(out);
+      resultEl.textContent = `${prettyOut} ${toLabel(to)}`;
+      explainEl.textContent = `(${raw} ${toLabel(from)} → ${Number(c.toPrecision(6))} °C → ${prettyOut} ${toLabel(to)})`;
+
+      history.push({input: pretty(v), from: unitShort(from), output: prettyOut, to: unitShort(to)});
+      if (history.length > 20) history.shift();
+      renderHistory();
+    }
+
+    function toLabel(u){
+      switch(u){case 'C': return '°C';case 'F': return '°F';case 'K': return 'K';case 'R': return '°Re';}
+    }
+    function unitShort(u){
+      switch(u){case 'C': return '°C';case 'F': return '°F';case 'K': return 'K';case 'R': return '°Re';}
+    }
+
+    el('convert').addEventListener('click', convert);
+    valueEl.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') convert(); });
+    el('swap').addEventListener('click', ()=>{ const a = fromEl.value; fromEl.value = toEl.value; toEl.value = a; });
+    el('copy').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(resultEl.textContent || ''); el('copy').textContent = '✓ Disalin'; setTimeout(()=> el('copy').textContent = '📋 Salin', 1200); }catch(e){ alert('Tidak dapat menyalin: ' + (e && e.message)); } });
+    el('clear').addEventListener('click', ()=>{ history = []; renderHistory(); });
+    window.addEventListener('load', ()=> valueEl.focus());
+    valueEl.value = '37';
+    fromEl.value = 'C';
+    toEl.value = 'F';
+    convert();
+  </script>
+</body>
+</html>
